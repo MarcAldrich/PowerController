@@ -9,3 +9,6 @@ services:
   app:
     privileged: true
     image: hub.foundries.io/tech-farm-af/powercontroller:latest
+    devices:
+      - "/dev:/dev"
+      - "/sys:/sys"
