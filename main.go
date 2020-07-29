@@ -9,7 +9,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/stianeikeland/go-rpio"
+	"github.com/stianeikeland/go-rpio/v4"
 	"os"
 	"time"
 )
@@ -34,7 +34,8 @@ func main() {
 
 	// Toggle pin 20 times
 	for x := 0; x < 20; x++ {
-		pin.Toggle()
-		time.Sleep(time.Second / 5)
+		pin.Low()
+		time.Sleep(1 * time.Second)
+		pin.High()
 	}
 }
