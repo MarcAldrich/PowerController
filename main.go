@@ -1,28 +1,40 @@
+/*
+A blinker example using go-rpio library.
+Requires administrator rights to run
+Toggles a LED on physical pin 19 (mcu pin 10)
+Connect a LED with resistor from pin 19 to ground.
+*/
+
 package main
 
 import (
+	"fmt"
+	"github.com/stianeikeland/go-rpio"
+	"os"
 	"time"
+)
 
-	"gobot.io/x/gobot"
-	"gobot.io/x/gobot/drivers/gpio"
-	"gobot.io/x/gobot/platforms/raspi"
+var (
+	// Use mcu pin 10, corresponds to physical pin 19 on the pi
+	pin = rpio.Pin(10)
 )
 
 func main() {
-	r := raspi.NewAdaptor()
-	led := gpio.NewLedDriver(r, "7")
-
-	work := func() {
-		gobot.Every(1*time.Second, func() {
-			led.Toggle()
-		})
+	// Open and map memory to access gpio, check for errors
+	if err := rpio.Open(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
-	robot := gobot.NewRobot("blinkBot",
-		[]gobot.Connection{r},
-		[]gobot.Device{led},
-		work,
-	)
+	// Unmap gpio memory when done
+	defer rpio.Close()
 
-	robot.Start()
+	// Set pin to output mode
+	pin.Output()
+
+	// Toggle pin 20 times
+	for x := 0; x < 20; x++ {
+		pin.Toggle()
+		time.Sleep(time.Second / 5)
+	}
 }

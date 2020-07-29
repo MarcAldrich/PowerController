@@ -1,6 +1,6 @@
 # Author: Marc Aldrich
 #
-# Date Last Modified: 2020 July 27
+# Date Last Modified: 2020 July 29
 # Date Created: 2020 July 27
 # Summary: Multistage build to optimze runtime container size.
 # Options: Arch left as option
@@ -21,11 +21,8 @@ ENV GO111MODULE=on \
 RUN mkdir /build
 ADD . /build/
 WORKDIR /build
-#RUN go build -o main .
-RUN ls -halt
-RUN pwd
-RUN go build -ldflags="-extldflags=-static" -o main .
-# Move to /dist directory as the place for resulting binary folder
+RUN go build -ldflags="-extldflags=-static" -o main
+
 
 # RUNTIME container needs only
 FROM scratch as RUNNER
