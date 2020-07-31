@@ -37,27 +37,30 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 	userRequestedPumpID, ok := r.URL.Query()["pumpRelayId"]
 	if ok {
 		//If not found error out
-		http.Error(w, "Must specify which pumpRelayId to toggle.", http.StatusBadRequest)
+		http.Error(w, "pumpRelayId not found in option strings. Example: `curl -X POST raspberrypi3-64.local:2080/pump?pumpRelayId[]=1`.", http.StatusBadRequest)
 		return
 	}
 
-	// Convert pumpID from string to int
-	pumpRelayId, err := strconv.Atoi(userRequestedPumpID[0]) //TODO: Make this line not hardcoded. Handle list decomposition, maybe the user wants to control multiple pumps at once.
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Must specify which pumpRelayId to toggle. `%s` not recognized.", pumpRelayId), http.StatusBadRequest)
-		return
-	}
+	// Loop over all values passed in by user
+	for _, userInputPumpRelayId := range userRequestedPumpID {
+		// Convert pumpID from string to int
+		pumpRelayId, err := strconv.Atoi(userInputPumpRelayId) //TODO: Make this line not hardcoded. Handle list decomposition, maybe the user wants to control multiple pumps at once.
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Expected Relay ID. Must specify which pumpRelayId to toggle. `%s` not recognized.", pumpRelayId), http.StatusBadRequest)
+			return
+		}
 
-	// Verify pumpID is in range
-	if pumpRelayId > len(pumpPowerRelayControlPins) {
-		http.Error(w, "Invalid pumpRelayId to toggle.", http.StatusBadRequest)
-	}
+		// Verify pumpID is in range
+		if pumpRelayId > len(pumpPowerRelayControlPins) {
+			http.Error(w, "Pump Relay ID unknown.", http.StatusBadRequest)
+		}
 
-	switch hwState := pumpPowerRelayControlPins[pumpRelayId].Read(); hwState {
-	case rpio.High:
-		pumpPowerRelayControlPins[pumpRelayId].Low()
-	case rpio.Low:
-		pumpPowerRelayControlPins[pumpRelayId].High()
+		switch hwState := pumpPowerRelayControlPins[pumpRelayId].Read(); hwState {
+		case rpio.High:
+			pumpPowerRelayControlPins[pumpRelayId].Low()
+		case rpio.Low:
+			pumpPowerRelayControlPins[pumpRelayId].High()
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
