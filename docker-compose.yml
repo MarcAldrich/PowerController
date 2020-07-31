@@ -9,7 +9,9 @@ services:
   hardware_controller:
     privileged: true
     image: hub.foundries.io/tech-farm-af/powercontroller:latest
-    # TODO: START HERE-> Need to expose the API port
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "2080:2080"
     devices:
