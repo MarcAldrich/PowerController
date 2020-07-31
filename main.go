@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 var (
@@ -30,29 +31,26 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 	// Only handling a post method
 	if r.Method != "POST" {
 		http.Error(w, "Method is not supported.", http.StatusNotImplemented)
+		return
 	}
 
+	rawUserRequestedPumpId := r.URL.Query().Get("pumpRelayId")
 	// Get userRequestedPumpID ID to cycle
-	userRequestedPumpID := r.URL.Query().Get("pumpRelayId")
-
-	// Loop over all values passed in by user
-	// TODO: START HERE. Don't think the loop is running at all
-	for _, userInputPumpRelayId := range userRequestedPumpID {
-		//Make sure we have that pin in our config
-		if int(userInputPumpRelayId) < len(pumpPowerRelayControlPins) {
-
-			switch hwState := pumpPowerRelayControlPins[userInputPumpRelayId].Read(); hwState {
-			case rpio.High:
-				pumpPowerRelayControlPins[userInputPumpRelayId].Low()
-			case rpio.Low:
-				pumpPowerRelayControlPins[userInputPumpRelayId].High()
-			}
-			// Request completed
-			w.WriteHeader(http.StatusOK)
-		} else {
-			http.Error(w, fmt.Sprintf("Failed to set pin `%d` because it isn't configured on this device.", userInputPumpRelayId), http.StatusBadRequest)
-		}
+	userRequestedPumpID, err := strconv.Atoi(rawUserRequestedPumpId)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("pumpRelayId: %s not recognized.", rawUserRequestedPumpId), http.StatusBadRequest)
+		return
 	}
+
+	switch hwState := pumpPowerRelayControlPins[userRequestedPumpID].Read(); hwState {
+	case rpio.High:
+		pumpPowerRelayControlPins[userRequestedPumpID].Low()
+	case rpio.Low:
+		pumpPowerRelayControlPins[userRequestedPumpID].High()
+	}
+
+	// Request completed
+	w.WriteHeader(http.StatusOK)
 	return
 }
 
