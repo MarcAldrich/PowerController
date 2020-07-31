@@ -50,7 +50,7 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 			// Request completed
 			w.WriteHeader(http.StatusOK)
 		} else {
-			http.Error(w, "Failed to set pin `%d` because it isn't configured on this device.", http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("Failed to set pin `%d` because it isn't configured on this device.", userInputPumpRelayId), http.StatusBadRequest)
 		}
 	}
 	return
