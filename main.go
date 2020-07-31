@@ -16,7 +16,7 @@ var (
 )
 
 func homePage(w http.ResponseWriter, r *http.Request){
-	fmt.Fprintf(w, "PowerHive by RedBeardRanch")
+	fmt.Fprintf(w, "PowerHive by RedBeardRanch\n")
 	fmt.Println("Endpoint Hit: home")
 }
 
@@ -33,8 +33,8 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method is not supported.", http.StatusNotImplemented)
 	}
 
-	// Get pump ID to cycle
-	pump, ok := r.URL.Query()["pumpRelayId"]
+	// Get userRequestedPumpID ID to cycle
+	userRequestedPumpID, ok := r.URL.Query()["pumpRelayId"]
 	if ok {
 		//If not found error out
 		http.Error(w, "Must specify which pumpRelayId to toggle.", http.StatusBadRequest)
@@ -42,9 +42,9 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert pumpID from string to int
-	pumpRelayId, err := strconv.Atoi(pump[0]) //TODO: Make this line not hardcoded. Handle list decomposition, maybe the user wants to control multiple pumps at once.
+	pumpRelayId, err := strconv.Atoi(userRequestedPumpID[0]) //TODO: Make this line not hardcoded. Handle list decomposition, maybe the user wants to control multiple pumps at once.
 	if err != nil {
-		http.Error(w, "Must specify which pumpRelayId to toggle.", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Must specify which pumpRelayId to toggle. `%s` not recognized.", pumpRelayId), http.StatusBadRequest)
 		return
 	}
 
