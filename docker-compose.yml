@@ -6,9 +6,12 @@
 # Example to bring up image: `docker run gobot-helloworld`
 version: "3"
 services:
-  app:
+  hardware_controller:
     privileged: true
     image: hub.foundries.io/tech-farm-af/powercontroller:latest
+    # TODO: START HERE-> Need to expose the API port
+    ports:
+      - "2080:2080"
     devices:
       - "/dev:/dev"
       - "/sys:/sys"
