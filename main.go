@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 var (
@@ -34,36 +33,27 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get userRequestedPumpID ID to cycle
-	userRequestedPumpID, ok := r.URL.Query()["pumpRelayId"]
-	if ok {
-		//If not found error out
-		http.Error(w, "pumpRelayId not found in option strings. Example: `curl -X POST raspberrypi3-64.local:2080/pump?pumpRelayId[]=1`.", http.StatusBadRequest)
-		return
-	}
+	userRequestedPumpID := r.URL.Query().Get("pumpRelayId")
 
 	// Loop over all values passed in by user
+	// TODO: START HERE. Don't think the loop is running at all
 	for _, userInputPumpRelayId := range userRequestedPumpID {
-		// Convert pumpID from string to int
-		pumpRelayId, err := strconv.Atoi(userInputPumpRelayId) //TODO: Make this line not hardcoded. Handle list decomposition, maybe the user wants to control multiple pumps at once.
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Expected Relay ID. Must specify which pumpRelayId to toggle. `%s` not recognized.", pumpRelayId), http.StatusBadRequest)
-			return
-		}
+		//Make sure we have that pin in our config
+		if int(userInputPumpRelayId) < len(pumpPowerRelayControlPins) {
 
-		// Verify pumpID is in range
-		if pumpRelayId > len(pumpPowerRelayControlPins) {
-			http.Error(w, "Pump Relay ID unknown.", http.StatusBadRequest)
-		}
-
-		switch hwState := pumpPowerRelayControlPins[pumpRelayId].Read(); hwState {
-		case rpio.High:
-			pumpPowerRelayControlPins[pumpRelayId].Low()
-		case rpio.Low:
-			pumpPowerRelayControlPins[pumpRelayId].High()
+			switch hwState := pumpPowerRelayControlPins[userInputPumpRelayId].Read(); hwState {
+			case rpio.High:
+				pumpPowerRelayControlPins[userInputPumpRelayId].Low()
+			case rpio.Low:
+				pumpPowerRelayControlPins[userInputPumpRelayId].High()
+			}
+			// Request completed
+			w.WriteHeader(http.StatusOK)
+		} else {
+			http.Error(w, "Failed to set pin `%d` because it isn't configured on this device.", http.StatusBadRequest)
 		}
 	}
-
-	w.WriteHeader(http.StatusOK)
+	return
 }
 
 func setupGpio() {
