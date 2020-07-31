@@ -42,13 +42,14 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch hwState := pumpPowerRelayControlPins[userRequestedPumpID].Read(); hwState {
-	case rpio.High:
-		pumpPowerRelayControlPins[userRequestedPumpID].Low()
-	case rpio.Low:
-		pumpPowerRelayControlPins[userRequestedPumpID].High()
+	if userRequestedPumpID < len(pumpPowerRelayControlPins)-1 {
+		switch hwState := pumpPowerRelayControlPins[userRequestedPumpID].Read(); hwState {
+		case rpio.High:
+			pumpPowerRelayControlPins[userRequestedPumpID].Low()
+		case rpio.Low:
+			pumpPowerRelayControlPins[userRequestedPumpID].High()
+		}
 	}
-
 	// Request completed
 	w.WriteHeader(http.StatusOK)
 	return
