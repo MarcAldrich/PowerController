@@ -42,7 +42,7 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if userRequestedPumpID < len(pumpPowerRelayControlPins)-1 {
+	if userRequestedPumpID <= len(pumpPowerRelayControlPins)-1 {
 		switch hwState := pumpPowerRelayControlPins[userRequestedPumpID].Read(); hwState {
 		case rpio.High:
 			pumpPowerRelayControlPins[userRequestedPumpID].Low()
