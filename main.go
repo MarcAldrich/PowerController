@@ -55,7 +55,8 @@ func handlePumpRequest(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func setupGpio() {
+func main() {
+	// Initialize Gpio
 	// Open and map memory to access gpio, check for errors
 	if err := rpio.Open(); err != nil {
 		fmt.Println(err)
@@ -65,14 +66,10 @@ func setupGpio() {
 	defer rpio.Close()
 
 	// Set pumpPowerRelayControlPin to output mode
-	for _, controlPin := range pumpPowerRelayControlPins {
-		controlPin.Output()
+	for _, pumpRelayControlPin := range pumpPowerRelayControlPins {
+		log.Printf(fmt.Sprintf("Setting GPIO Pin %d"))
+		pumpRelayControlPin.Output()
 	}
-}
-
-func main() {
-	// Initialize Gpio
-	setupGpio()
 
 	// Start REST server
 	handleRequests()
