@@ -10,7 +10,6 @@ import (
 )
 
 var (
-
 	pumpPowerRelayControlPins = [2]rpio.Pin{rpio.Pin(14), rpio.Pin(10)} //TODO: Give pumps a struct. They should be searchable. {Name, hardware pin, unique id, power relay status} UID -> make them globally unique from the start
 	httpAddrAndListenPort = ":2080"
 )
